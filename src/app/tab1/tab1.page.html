@@ -71,7 +71,7 @@
       <ion-col size="6">
             <ion-list>
                   <ion-list-header>
-                    <ion-label>Estrategias (MAX: <span style="color: red;">{{lastIndiceValor.high}}</span> ,V: <span style="color: yellow;">{{lastIndiceValor.last_numeric}}</span>,MIN: <span style="color: green;">{{lastIndiceValor.low}}</span> )</ion-label>
+                    <ion-label>Estrategias (MAX: <span style="color: green;">{{lastIndiceValor.high}}</span> ,V: <span style="color: yellow;">{{lastIndiceValor.last_numeric}}</span>,MIN: <span style="color: red;">{{lastIndiceValor.low}}</span> )</ion-label>
                     
                     
                   </ion-list-header>
@@ -93,10 +93,23 @@
                         </ion-col>
                       </ion-row>
                       <ion-row>
-                        <ion-col size="10">
+                        <ion-col size="9">
+                          MAX: <span style="color: green;">{{senial.valorMaxActual}}</span> ,V: <span style="color: yellow;">{{senial.valorActual}}</span>,MIN: <span style="color: red;">{{senial.valorMinActual}}</span>
+                      
+                          <strong style="color: ivory;    font-size: 20px;" >
+                            |
+                          </strong>
+                          <ion-icon  class="tam_icon" [ngStyle]="{'color': senial.colorTendencia}" [name]="senial.tipoArrow"></ion-icon>
 
-                          <span>Valor: {{senial.valorActual}}</span>
-                          <ion-icon [ngStyle]="{'color': senial.colorTendencia}" [name]="senial.tipoArrow"></ion-icon>
+                         
+                        </ion-col>
+                        <ion-col size="1" [title]="senial.isMax ? 'Máximo actual' : 'Mínimo actual'">
+                          <ion-icon class="tam_icon" color="success" *ngIf="senial.isMax" title="Máximo actual" name="trending-up"></ion-icon>
+
+                          <ion-icon class="tam_icon" name="trending-down" color="danger" *ngIf="senial.isMin" title="Mínimo actual"></ion-icon>
+                         
+                         
+                          
                         </ion-col>
                         <ion-col size="2" class="ion-text-center">
                           <ion-badge color="dark">{{senial.hora}}</ion-badge>

@@ -63,7 +63,11 @@ export interface Senial {
   colorTendencia : string,
   tipoArrow :string,
   background : string,
-  isSenialRelevante : boolean
+  isSenialRelevante : boolean,
+  valorMaxActual : number,
+  valorMinActual :number
+  isMin : boolean,
+  isMax : boolean
 
   
 }
@@ -73,4 +77,10 @@ export interface Alerta {
 
   sonido : SoundClass,
   habilitado: boolean
+}
+
+export interface IndiceInfo {
+
+  nombre :string,
+  id: number
 }

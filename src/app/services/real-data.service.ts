@@ -111,7 +111,10 @@ export class RealDataService {
             {
               let lastValueIndex : IndiceValor = JSON.parse(indice.message.replace(id, ""));
               let result = vm.tIndicat.setNextValueAllIndicatorIndex(idIndex.toString(), lastValueIndex.last_numeric);
+
               Object.assign(lastValueIndex, result);
+              lastValueIndex.low = lastValueIndex.low.replace(",", ".");
+              lastValueIndex.high = lastValueIndex.high.replace(",", ".");
               //envia siguiente valor
               s.next(lastValueIndex);
             }

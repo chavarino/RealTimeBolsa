@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import Highcharts, { DataLabelsOptions, PointLabelObject, PointOptionsObject, Series } from 'highcharts';
 import { SoundClass } from '../clases/sound';
-import { Alerta, IndiceValor, Senial } from '../interfaces/data';
+import { Alerta, IndiceInfo, IndiceValor, Senial } from '../interfaces/data';
 // import Highcharts from 'highcharts/highstock';
 import { RealDataService } from '../services/real-data.service';
 1
@@ -23,14 +23,27 @@ export class Tab1Page implements OnInit {
 
       bollingBands : {}
     } as IndiceValor;
-    idIndex: number = 13809;
     precio : number[] = [];
     hora : string[] = [];
     bbUpper : number[] = [];
     bbLower : number[] = [];
     bbMiddle : number[] = [];
     serie : PointOptionsObject[];
-  constructor(private rDService : RealDataService) {}
+
+
+
+    indicesInfo :Map<string, IndiceInfo> = new Map<string, IndiceInfo>();
+
+  constructor(private rDService : RealDataService) {
+    this.indicesInfo.set("iag", {
+      nombre : "IAG",
+      id: 13809
+    })
+
+  }
+
+
+  
 
   limites = {
 
@@ -77,7 +90,7 @@ export class Tab1Page implements OnInit {
 
    this.crearHighCharts();
 
-   this.rDService.getRealTimeData(this.idIndex).subscribe(o=>{
+   this.rDService.getRealTimeData(this.indicesInfo.get("iag").id).subscribe(o=>{
         
         this.listaHistorico.push(o);
         this.lastIndiceValor = o;
@@ -123,18 +136,42 @@ playAlertaSeniales(alerta : Alerta)
 
 }
 
-
+getNewSenial(indice :string, estrategia : string, info:string, accion :string, colorSenial : string, background : string, isSenialRelevante : boolean) : Senial
+{
+  let max = parseFloat(this.lastIndiceValor.high);
+  let min = parseFloat(this.lastIndiceValor.low);
+    return {
+      valorMaxActual: max,
+      valorMinActual: min,
+      isMax: this.lastIndiceValor.last_numeric > max,
+      isMin: this.lastIndiceValor.last_numeric < min,
+      indice: indice,
+      estrategia: estrategia,
+        //indiceValor: this.lastIndiceValor,
+        info : info,
+        accion: accion,
+        colorSenial: colorSenial,
+        hora : this.lastIndiceValor.time,
+        valorActual:this.lastIndiceValor.last_numeric,
+        colorTendencia : this.lastIndiceValor.last_dir === "redBg" ? "red" : "green",
+        tipoArrow : this.lastIndiceValor.last_dir === "redBg" ? "arrow-down" : "arrow-up",  
+        background : background,
+        isSenialRelevante: isSenialRelevante
+    } ;
+}
 isSuperadosLimites()
 { 
 
-  let senial : Senial =
-  {
-
-  } as Senial;
+ 
+  let senial : Senial;
   if(this.alertaSeniales.limInferior.habilitado && this.limites.inferior !== undefined && this.limites.inferior> this.lastIndiceValor.last_numeric)
   {
-    senial  = {
-      indice : "IAG",
+    senial  = this.getNewSenial(this.indicesInfo.get("iag").nombre, "Limite Inferior",
+    `ALERTA LIM. Inferior ` + (parseFloat(this.lastIndiceValor.low) > this.limites.inferior ? "(Mínimo)" : ""), "-", "orange", "orange", true);
+    
+    /*
+    {
+      
       estrategia: "Limite Inferior",
       //indiceValor: this.lastIndiceValor,
       info : `ALERTA LIM.INFERIOR ` + (parseFloat(this.lastIndiceValor.low) > this.limites.inferior ? "(MíNIMO)" : ""),
@@ -146,28 +183,19 @@ isSuperadosLimites()
       tipoArrow : this.lastIndiceValor.last_dir === "redBg" ? "arrow-down-outline" : "arrow-up-outline",  
       background : "orange",
       isSenialRelevante: true
-    }
+    }*/
 
     this.listaSeniales.unshift(senial);
 
     this.playAlertaSeniales(this.alertaSeniales.limInferior)
 
   }
+  
   if (this.alertaSeniales.limSuperior.habilitado && this.limites.superior !== undefined && this.limites.superior< this.lastIndiceValor.last_numeric){
-    senial  = {
-      indice : "IAG",
-      estrategia: "Limite Superior",
-      //indiceValor: this.lastIndiceValor,
-      info : `ALERTA LIM. SUPERIOR ` + (parseFloat(this.lastIndiceValor.high) < this.limites.superior ? "(MÁXIMO)" : ""),
-      accion: "Venta?",
-      colorSenial: "orange",
-      hora : this.lastIndiceValor.time,
-      valorActual:this.lastIndiceValor.last_numeric,
-      colorTendencia : this.lastIndiceValor.last_dir === "redBg" ? "red" : "green",
-      tipoArrow : this.lastIndiceValor.last_dir === "redBg" ? "arrow-down-outline" : "arrow-up-outline",  
-      background : "orange" ,
-      isSenialRelevante: true
-    }
+
+
+    senial  = this.getNewSenial(this.indicesInfo.get("iag").nombre, "Limite Superior",
+    `ALERTA LIM. SUPERIOR ` + (parseFloat(this.lastIndiceValor.high) < this.limites.superior ? "(MÁXIMO)" : ""), "-", "orange", "orange", true);
     this.playAlertaSeniales(this.alertaSeniales.limSuperior)
     this.listaSeniales.unshift(senial);
   }
@@ -206,8 +234,13 @@ getSenial()
     isSenialRelevante = true;
   }
   
-  
-    let senial : Senial = {
+    let max = parseFloat(this.lastIndiceValor.high);
+    let min = parseFloat(this.lastIndiceValor.low);
+    let senial : Senial =  this.getNewSenial(this.indicesInfo.get("iag").nombre, "BB - RSI",
+    `PB: ${this.lastIndiceValor.bollingBands.pb.toFixed(2)} - RSI: ${this.lastIndiceValor.rsi.toFixed(2)}`, accion, color, "purple", isSenialRelevante);
+    
+    
+    /*{
       indice : "IAG",
       estrategia: "BB - RSI",
       //indiceValor: this.lastIndiceValor,
@@ -219,10 +252,15 @@ getSenial()
       colorTendencia : this.lastIndiceValor.last_dir === "redBg" ? "red" : "green",
       tipoArrow : this.lastIndiceValor.last_dir === "redBg" ? "arrow-down-outline" : "arrow-up-outline",  
       background : "purple" ,
-      isSenialRelevante :isSenialRelevante 
+      isSenialRelevante :isSenialRelevante,
+      valorMaxActual : max,
+      valorMinActual : min,
+      isMax : this.lastIndiceValor.last_numeric > max,
+      isMin : this.lastIndiceValor.last_numeric < min
+
 
       
-    }
+    }*/
 
     this.listaSeniales.unshift(senial);
 }
