@@ -15,6 +15,28 @@ export class Tab1Page implements OnInit {
   filtros = {
     soloRelevantes : false
   }
+
+  pestanaSeleccioanda : number = 1;
+  pestanas = {
+
+    opci : {
+      name : "Opciones",
+      value :1
+    },
+    calc : {
+      name : "Calculadora",
+      value :2
+    }
+  }
+
+  calculadora = {
+
+    dinero : 0,
+    precCompra : 0,
+    precVenta : 0
+  }
+
+
   elementsNumber  :  number = 15;
     listaSenialesView : Array<Senial> = [];
     listaSeniales : Array<Senial> = []; 
@@ -143,8 +165,8 @@ getNewSenial(indice :string, estrategia : string, info:string, accion :string, c
     return {
       valorMaxActual: max,
       valorMinActual: min,
-      isMax: this.lastIndiceValor.last_numeric > max,
-      isMin: this.lastIndiceValor.last_numeric < min,
+      isMax: this.lastIndiceValor.last_numeric >= max,
+      isMin: this.lastIndiceValor.last_numeric <= min,
       indice: indice,
       estrategia: estrategia,
         //indiceValor: this.lastIndiceValor,
@@ -403,5 +425,25 @@ getSenial()
                 }*/
 
             }, undefined);
+ }
+
+
+ cambioSegmento($event)
+ {
+    let vm=this;
+
+    console.log("Segmento: ", $event)
+
+    this.pestanaSeleccioanda = parseInt($event["detail"].value);
+ }
+
+ getKeysOfPestanas()
+ {
+
+  return Object.keys(this.pestanas);
+ }
+ calcularGanancias()
+ {
+   return (this.lastIndiceValor.last_numeric/this.calculadora.precCompra - 1) * this.calculadora.dinero
  }
 }

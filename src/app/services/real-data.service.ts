@@ -38,8 +38,10 @@ export class RealDataService {
     return new Observable<IndiceValor>((s)=>{
 
           setInterval(()=>{
-
-              s.next(dataMock.shift());
+            let lastValueIndex = dataMock.shift();
+              lastValueIndex.low = lastValueIndex.low.replace(",", ".");
+              lastValueIndex.high = lastValueIndex.high.replace(",", ".");
+              s.next(lastValueIndex);
 
           }, 1500);
 

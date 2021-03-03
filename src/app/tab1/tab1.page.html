@@ -20,7 +20,57 @@
       </ion-col>
       
     </ion-row>
+    
     <ion-row>
+      <ion-col size="3">
+        
+      </ion-col>
+      <ion-col size="6">
+        <ion-segment (ionChange)="cambioSegmento($event)" [value]="pestanaSeleccioanda">
+          <ion-segment-button *ngFor="let keyPestana of getKeysOfPestanas()" [value]="pestanas[keyPestana].value">
+            <ion-label>{{pestanas[keyPestana].name}}</ion-label>
+          </ion-segment-button>
+
+        </ion-segment>
+
+      </ion-col>
+      <ion-col size="3">
+        
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="pestanaSeleccioanda===pestanas.calc.value">
+      <ion-col size="3">
+        
+      </ion-col>
+      <ion-col size="1">
+          <ion-label>Dinero</ion-label>
+          <ion-input type="text" [(ngModel)]="calculadora.dinero" placeholder="5000€"></ion-input>
+      </ion-col>
+      <ion-col size="2">
+          <ion-label>Prec. Compra</ion-label>
+          <ion-input type="text" [(ngModel)]="calculadora.precCompra" placeholder="1.5"></ion-input>
+      </ion-col>
+      <ion-col size="1">
+        <ion-label>Acciones</ion-label>
+        <br>
+        <strong>{{(calculadora.dinero/calculadora.precCompra) | number:'1.1-2'}}</strong>
+    </ion-col>
+    <ion-col size="1">
+      <ion-label>Prec. Venta</ion-label>
+      <br>
+      <strong>{{lastIndiceValor.last_numeric}}</strong>
+  </ion-col>
+    <ion-col size="1">
+        <ion-label>Ganancia</ion-label>
+        <br>
+        <strong [ngStyle]="{'color': calcularGanancias() >=0 ? 'green' : 'red'}">
+          {{ calcularGanancias() | number:'1.1-2'}}</strong>
+    </ion-col>
+
+      <ion-col size="3">
+        
+      </ion-col>    </ion-row>
+    <ion-row *ngIf="pestanaSeleccioanda===pestanas.opci.value">
       <ion-col size="3">
         
       </ion-col>
