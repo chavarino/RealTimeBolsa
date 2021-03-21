@@ -8,6 +8,24 @@
 
 <ion-content [fullscreen]="true">
 
+  <ion-row>
+    <ion-col size="2">
+        
+    </ion-col>
+    <ion-col size="8">
+        <ion-item>
+          <ion-label>Valores</ion-label>
+          <ion-select (ngModelChange)="setSelectedIndice($event)" [(ngModel)]="indiceSelected">
+            <ion-select-option  *ngFor="let indice of indicesLista" [value]="indice">{{indice.nombre}}</ion-select-option>
+        
+          </ion-select>
+        </ion-item>
+
+    </ion-col>
+    <ion-col size="2">
+        
+    </ion-col>
+  </ion-row>
   <ion-grid fixed>
 
     <ion-row>
@@ -38,73 +56,27 @@
         
       </ion-col>
     </ion-row>
-    <ion-row *ngIf="pestanaSeleccioanda===pestanas.calc.value">
-      <ion-col size="3">
-        
-      </ion-col>
-      <ion-col size="1">
-          <ion-label>Dinero</ion-label>
-          <ion-input type="text" [(ngModel)]="calculadora.dinero" placeholder="5000€"></ion-input>
-      </ion-col>
-      <ion-col size="2">
-          <ion-label>Prec. Compra</ion-label>
-          <ion-input type="text" [(ngModel)]="calculadora.precCompra" placeholder="1.5"></ion-input>
-      </ion-col>
-      <ion-col size="1">
-        <ion-label>Acciones</ion-label>
-        <br>
-        <strong>{{(calculadora.dinero/calculadora.precCompra) | number:'1.1-2'}}</strong>
-    </ion-col>
-    <ion-col size="1">
-      <ion-label>Prec. Venta</ion-label>
-      <br>
-      <strong>{{lastIndiceValor.last_numeric}}</strong>
-  </ion-col>
-    <ion-col size="1">
-        <ion-label>Ganancia</ion-label>
-        <br>
-        <strong [ngStyle]="{'color': calcularGanancias() >=0 ? 'green' : 'red'}">
-          {{ calcularGanancias() | number:'1.1-2'}}</strong>
-    </ion-col>
+    <app-calculadora-generica [hidden]="pestanaSeleccioanda!==pestanas.calc.value" [lastIndiceValor]="lastIndiceValor.last_numeric">
 
-      <ion-col size="3">
-        
-      </ion-col>    </ion-row>
+    </app-calculadora-generica>
     <ion-row *ngIf="pestanaSeleccioanda===pestanas.opci.value">
       <ion-col size="3">
         
       </ion-col>
       <ion-col size="3"  class="ion-text-center">
-          <ion-label color="primary">Núm. Elemnt. ({{elementsNumber}})</ion-label>
-       
-  
-
-        <ion-range min="1" pin="true"  ticks="true" snaps="true" step="5"  max="200" color="secondary" [(ngModel)]="elementsNumber">
-          <ion-label slot="start">1</ion-label>
-          <ion-label slot="end">200</ion-label>
-        </ion-range>
+          <app-rango-muestras (onChangeNumMuestras)="numeroMuestrasVistas = $event"></app-rango-muestras>
 
       </ion-col>
       <ion-col size="3" class="ion-text-center">
         <ion-label color="primary">Alertas</ion-label>
         <ion-row>
           <ion-col size="6">
-            <ion-label color="secondary">Lim. Inferior 
-            </ion-label>
-                    <ion-button (click)="switchHabilitado(alertaSeniales.limInferior)" expand="block" fill="clear" shape="round">
-                      <ion-icon *ngIf="alertaSeniales.limInferior.habilitado" slot="icon-only" name="notifications-outline"></ion-icon>
-                      <ion-icon *ngIf="!alertaSeniales.limInferior.habilitado" slot="icon-only" name="notifications-off-outline"></ion-icon>
-                  </ion-button>
-              <ion-input type="number" [(ngModel)]="limites.inferior" placeholder="1.3"></ion-input>
+            <app-limites-alerta [label]="limites.inferior.label"  [tipo]="limites.inferior.tipo" [valorPredet]="limites.inferior.valor" (modelChange)="limitesModelChange($event)" ></app-limites-alerta>
+
           </ion-col>
           <ion-col size="6">
-            <ion-label color="secondary">Lim. Superior</ion-label>
-            <ion-button (click)="switchHabilitado(alertaSeniales.limSuperior)"  fill="clear" shape="round">
-              <ion-icon *ngIf="alertaSeniales.limSuperior.habilitado" slot="icon-only" name="notifications-outline"></ion-icon>
-              <ion-icon *ngIf="!alertaSeniales.limSuperior.habilitado" slot="icon-only" name="notifications-off-outline"></ion-icon>
-          </ion-button>
-            <ion-input [(ngModel)]="limites.superior" type="number" placeholder="1.3"></ion-input>
-
+             
+              <app-limites-alerta [label]="limites.superior.label"  [tipo]="limites.superior.tipo" [valorPredet]="limites.superior.valor" (modelChange)="limitesModelChange($event)" ></app-limites-alerta>
           </ion-col>
         </ion-row>
 

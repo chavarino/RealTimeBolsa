@@ -8,7 +8,7 @@ import { TecnicalIndicatorsService } from './tecnical-indicators.service';
   providedIn: 'root'
 })
 export class RealDataService {
-  
+
 
   private idSocket =1;
   

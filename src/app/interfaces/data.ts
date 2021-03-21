@@ -84,3 +84,29 @@ export interface IndiceInfo {
   nombre :string,
   id: number
 }
+
+export interface CalculadoraInputs {
+  ganancia: number;
+  dinero : number,
+  precCompra : number,
+  precVenta : number,
+  isPrecioManual : boolean,
+  isInverso ?: boolean,
+  isLoaded ?: boolean
+}
+
+export interface ObjectCustom<T> {
+  [key: string] : T
+}
+
+export enum TipoLimite {
+
+    INFERIOR = 1,
+    SUPERIOR = 2
+}
+export interface Limite {
+  label ?: string,
+  valor : number,
+  habilitado : boolean,
+  tipo :TipoLimite
+}

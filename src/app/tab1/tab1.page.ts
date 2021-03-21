@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import Highcharts, { DataLabelsOptions, PointLabelObject, PointOptionsObject, Series } from 'highcharts';
+import { Subscription } from 'rxjs';
 import { SoundClass } from '../clases/sound';
-import { Alerta, IndiceInfo, IndiceValor, Senial } from '../interfaces/data';
+import { Alerta, IndiceInfo, IndiceValor, Senial, ObjectCustom, Limite, TipoLimite } from '../interfaces/data';
+import { LocalStoreService } from '../services/local-store.service';
 // import Highcharts from 'highcharts/highstock';
 import { RealDataService } from '../services/real-data.service';
 1
@@ -29,15 +31,10 @@ export class Tab1Page implements OnInit {
     }
   }
 
-  calculadora = {
-
-    dinero : 0,
-    precCompra : 0,
-    precVenta : 0
-  }
 
 
-  elementsNumber  :  number = 15;
+
+    numeroMuestrasVistas  :  number = 15;
     listaSenialesView : Array<Senial> = [];
     listaSeniales : Array<Senial> = []; 
     listaHistorico : Array<IndiceValor> = [];
@@ -53,25 +50,109 @@ export class Tab1Page implements OnInit {
     serie : PointOptionsObject[];
 
 
+  indicesLista : Array<IndiceInfo> = [
+    {
+      nombre : "IAG",
+      id: 13809
+    },
+    {nombre: "solaria",
+     id: 32180}
+
+  ]
+   indiceSelected : IndiceInfo;
 
     indicesInfo :Map<string, IndiceInfo> = new Map<string, IndiceInfo>();
 
-  constructor(private rDService : RealDataService) {
-    this.indicesInfo.set("iag", {
-      nombre : "IAG",
-      id: 13809
-    })
+  private readonly keyLocalStoreLimites = "limites";
+  susctiption: Subscription ;
+
+
+
+
+  constructor(private rDService : RealDataService, private localData : LocalStoreService) {
+    
+    
+    this.setSelectedIndice(this.indicesLista[0])
 
   }
 
+    setSelectedIndice (indice :IndiceInfo)
+    {
+      this.indiceSelected = indice;
+      this.indicesInfo.set("iag",this.indiceSelected); 
 
-  
 
-  limites = {
+      if(this.susctiption)
+      {
+        this.susctiption.unsubscribe();
+      }
+      this.susctiption = this.rDService.getRealTimeData(this.indiceSelected.id).subscribe(o=>{
+        
+        this.listaHistorico.push(o);
+        this.lastIndiceValor = o;
+        this.precio.push(o.last_numeric);
+
+        this.hora.push(o.time);
+
+        this.bbUpper.push(o.bollingBands.upper)
+        this.bbMiddle.push(o.bollingBands.middle);
+        this.bbLower.push(o.bollingBands.lower);
+
+        this.isSuperadosLimites();
+        this.getSenial();
+        
+        this.doFilters();
+        console.log("siguiente valor", o);
+        this.crearHighCharts();
+   })
+    }
+
+
+
+    limites : ObjectCustom<Limite> = {
+        inferior :  {
+
+            label : "Lim. Inferior",
+
+            habilitado: false,
+            tipo: TipoLimite.INFERIOR,
+            valor: 0
+
+
+
+
+        },
+        superior :  {
+
+          label : "Lim. Superior",
+
+          habilitado: false,
+          tipo: TipoLimite.SUPERIOR,
+          valor: 9999
+
+
+
+
+      }
+
+    }
+
+    limitesModelChange(limite: Limite)
+    {
+          if(limite.tipo===TipoLimite.SUPERIOR)
+          {
+              this.limites.superior = limite;
+          }
+          else{
+              this.limites.inferior = limite;
+          }
+    }
+
+  /*limites : ObjectCustom<number> = {
 
     superior : 99999,
     inferior : 0
-  }
+  }*/
   alertaSeniales = {
     compra:  {
       sonido: SoundClass.crearBip("/assets/sounds/senial_compra.mp3"),
@@ -112,27 +193,13 @@ export class Tab1Page implements OnInit {
 
    this.crearHighCharts();
 
-   this.rDService.getRealTimeData(this.indicesInfo.get("iag").id).subscribe(o=>{
-        
-        this.listaHistorico.push(o);
-        this.lastIndiceValor = o;
-        this.precio.push(o.last_numeric);
 
-        this.hora.push(o.time);
 
-        this.bbUpper.push(o.bollingBands.upper)
-        this.bbMiddle.push(o.bollingBands.middle);
-        this.bbLower.push(o.bollingBands.lower);
 
-        this.isSuperadosLimites();
-        this.getSenial();
-        
-        this.doFilters();
-        console.log("siguiente valor", o);
-        this.crearHighCharts();
-   })
    
  }
+
+
 
  switchHabilitado(alerta :Alerta, habilitado ?:boolean)
  {
@@ -141,7 +208,7 @@ export class Tab1Page implements OnInit {
  }
  getLastSeries<T>(array : T[]) : T[]
  {
-    return array.slice(Math.max(0, array.length-this.elementsNumber), array.length)
+    return array.slice(Math.max(0, array.length-this.numeroMuestrasVistas), array.length)
 
 
  }
@@ -186,10 +253,10 @@ isSuperadosLimites()
 
  
   let senial : Senial;
-  if(this.alertaSeniales.limInferior.habilitado && this.limites.inferior !== undefined && this.limites.inferior> this.lastIndiceValor.last_numeric)
+  if(this.limites.inferior.habilitado && this.limites.inferior !== undefined && this.limites.inferior.valor> this.lastIndiceValor.last_numeric)
   {
-    senial  = this.getNewSenial(this.indicesInfo.get("iag").nombre, "Limite Inferior",
-    `ALERTA LIM. Inferior ` + (parseFloat(this.lastIndiceValor.low) > this.limites.inferior ? "(Mínimo)" : ""), "-", "orange", "orange", true);
+    senial  = this.getNewSenial(this.indiceSelected.nombre, "Limite Inferior",
+    `ALERTA LIM. Inferior ` + (parseFloat(this.lastIndiceValor.low) > this.limites.inferior.valor ? "(Mínimo)" : ""), "-", "orange", "orange", true);
     
     /*
     {
@@ -209,16 +276,21 @@ isSuperadosLimites()
 
     this.listaSeniales.unshift(senial);
 
-    this.playAlertaSeniales(this.alertaSeniales.limInferior)
+ 
+      this.playAlertaSeniales(this.alertaSeniales.limInferior)
+
+    
 
   }
   
-  if (this.alertaSeniales.limSuperior.habilitado && this.limites.superior !== undefined && this.limites.superior< this.lastIndiceValor.last_numeric){
+  if (this.limites.superior.habilitado && this.limites.superior !== undefined && this.limites.superior.valor< this.lastIndiceValor.last_numeric){
 
 
-    senial  = this.getNewSenial(this.indicesInfo.get("iag").nombre, "Limite Superior",
-    `ALERTA LIM. SUPERIOR ` + (parseFloat(this.lastIndiceValor.high) < this.limites.superior ? "(MÁXIMO)" : ""), "-", "orange", "orange", true);
-    this.playAlertaSeniales(this.alertaSeniales.limSuperior)
+    senial  = this.getNewSenial(this.indiceSelected.nombre, "Limite Superior",
+    `ALERTA LIM. SUPERIOR ` + (parseFloat(this.lastIndiceValor.high) < this.limites.superior.valor ? "(MÁXIMO)" : ""), "-", "orange", "orange", true);
+
+      this.playAlertaSeniales(this.alertaSeniales.limSuperior)
+    
     this.listaSeniales.unshift(senial);
   }
 
@@ -258,7 +330,7 @@ getSenial()
   
     let max = parseFloat(this.lastIndiceValor.high);
     let min = parseFloat(this.lastIndiceValor.low);
-    let senial : Senial =  this.getNewSenial(this.indicesInfo.get("iag").nombre, "BB - RSI",
+    let senial : Senial =  this.getNewSenial(this.indiceSelected.nombre, "BB - RSI",
     `PB: ${this.lastIndiceValor.bollingBands.pb.toFixed(2)} - RSI: ${this.lastIndiceValor.rsi.toFixed(2)}`, accion, color, "purple", isSenialRelevante);
     
     
@@ -442,8 +514,5 @@ getSenial()
 
   return Object.keys(this.pestanas);
  }
- calcularGanancias()
- {
-   return (this.lastIndiceValor.last_numeric/this.calculadora.precCompra - 1) * this.calculadora.dinero
- }
+
 }

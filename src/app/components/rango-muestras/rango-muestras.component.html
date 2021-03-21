@@ -1,0 +1,5 @@
+<ion-label color="primary">Núm. Elemnt. ({{numeroMuestrasVistas}})</ion-label>
+<ion-range [min]="minNumber" (ngModelChange)="onChangeRange($event)" pin="true"  ticks="true" snaps="true" step="5"  [max]="maxNumber" color="secondary" [(ngModel)]="numeroMuestrasVistas">
+     <ion-label slot="start">{{minNumber}}</ion-label>
+     <ion-label slot="end">{{maxNumber}}</ion-label>
+</ion-range>
